@@ -1,7 +1,7 @@
 import cv2
 
 
-image = cv2.imread('images/cornerTraining/allTrue.jpg')
+image = cv2.imread('images/contourTraining/test2.png')
 
 # convert the image to grayscale format
 img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
@@ -32,13 +32,14 @@ image_copy = image.copy()
 for idx, contour in enumerate(filtered_contours):
     cv2.drawContours(image=image_copy, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=2,
                      lineType=cv2.LINE_AA)
-    M = cv2.moments(contour)
+    """
+        M = cv2.moments(contour)
     if M["m00"] != 0:
         cX = int(M["m10"] / M["m00"])
         cY = int(M["m01"] / M["m00"])
         # Add annotation
         cv2.putText(image_copy, f"Contour {idx}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 2)
-
+    """
 
 # see the results
 cv2.imshow('None approximation', image_copy)

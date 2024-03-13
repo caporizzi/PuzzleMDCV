@@ -3,23 +3,27 @@ from sys import argv
 import numpy as np
 import cv2 as cv
 
-
 training_file = 'images/cornerTraining/allTrue.jpg'
 filename = argv[0] if len(argv) > 0 else training_file
 
 # Loads an image
 src = cv.imread(cv.samples.findFile(training_file), cv.IMREAD_GRAYSCALE)
+
 # Check if image is loaded fine
 if src is None:
     print('Error opening image!')
     print('Usage: hough_lines.py [image_name -- default ' + training_file + '] \n')
 
+src = cv.medianBlur(src, ksize=5)
+src = cv.adaptiveThreshold(src,255,cv.ADAPTIVE_THRESH_GAUSSIAN_C,cv.THRESH_BINARY_INV,11,2)
+
 dst = cv.Canny(src, 50, 200, None, 3)
+cv.imshow('after canny', dst)
 
 # Copy edges to the images that will display the results in BGR
 cdst = cv.cvtColor(dst, cv.COLOR_GRAY2BGR)
-cdstP = np.copy(cdst)
 
+cdstP = np.copy(cdst)
 
 lines = cv.HoughLines(dst, 1, np.pi / 180, 150, None, 0, 0)
 
@@ -50,9 +54,8 @@ if linesP is not None:
         cv.putText(cdstP, f'({l[0]}, {l[1]})', (l[0], l[1]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv.LINE_AA)
         cv.putText(cdstP, f'({l[2]}, {l[3]})', (l[2], l[3]), cv.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1, cv.LINE_AA)
 
-
-#show image
+# show image
 cv.imshow("Source", src)
-#cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
+# cv.imshow("Detected Lines (in red) - Standard Hough Line Transform", cdst)
 cv.imshow("Detected Lines (in red) - Probabilistic Line Transform", cdstP)
 cv.waitKey()
