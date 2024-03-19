@@ -13,7 +13,7 @@ def cannyTransform(image):
 
 
 def findContours(image):
-    contours, _ = cv2.findContours(image, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+    contours, _ = cv2.findContours(image, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_NONE)
 
     min_contour_length = 500
 
@@ -31,7 +31,7 @@ def findContours(image):
                      lineType=cv2.LINE_AA)
 
     if filtered_contours:
-        first_contour_coordinates = filtered_contours[8].reshape(-1, 2)  # Reshape to Nx2 array
+        first_contour_coordinates = filtered_contours[0].reshape(-1, 2)  # Reshape to Nx2 array
         x = [point[0] for point in first_contour_coordinates]
         y = [point[1] for point in first_contour_coordinates]
 
@@ -65,7 +65,6 @@ def findContours(image):
         #    print(anglecalc.calculate_angle(x,y,x+1,y+1,x+20,y+20,x+21,y+21))
             # Calculate angles between 70° and 110°
         seen_points = set()
-        seen_angles = {}
 
         for i in range(len(first_contour_coordinates) - 4):
                 x1, y1 = first_contour_coordinates[i]
@@ -74,18 +73,11 @@ def findContours(image):
                 x5, y5 = first_contour_coordinates[i + 4]
 
                 angle = anglecalc.calculate_angle(x1, y1, x2, y2, x4, y4, x5, y5)
-                # Check if the angle has been seen before
-                if 80 <= angle <=  100:
-
-                    if angle in seen_angles:
-                        # Add points to seen_points only if the same angle is obtained twice
-                        points = [(x1,y1), (x2, y2), (x4, y4), (x5, y5)]
-                        if not any(point in seen_points for point in points):
-                            print(f"Angle: {angle}°, Points: {points}")
-                            seen_points.update(points)
-                    else:
-                        # Add the angle to the dictionary
-                        seen_angles[angle] = 1
+                if 170 <= angle <= 190:
+                    points = [(x2, y2), (x4, y4), (x5, y5)]
+                    if not any(point in seen_points for point in points):
+                        print(f"Angle: {angle}°, Points: {points}")
+                        seen_points.update(points)
 
 
 

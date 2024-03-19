@@ -1,7 +1,7 @@
 import cv2
 
 
-image = cv2.imread('images/contourTraining/test2.png')
+image = cv2.imread('images/allpieces/allpiecesCannypaint.png')
 
 # convert the image to grayscale format
 img_gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
