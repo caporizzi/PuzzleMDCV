@@ -24,6 +24,12 @@ def applyBinaryAndDrawContours(image):
     for idx, contour in enumerate(filtered_contours):
         cv2.drawContours(image=image_copy, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=2,
                          lineType=cv2.LINE_AA)
+        M = cv2.moments(contour)
+        if M["m00"] != 0:
+            cX = int(M["m10"] / M["m00"])
+            cY = int(M["m01"] / M["m00"])
+            # Add annotation
+            cv2.putText(image_copy, f"Cont {idx}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 2)
     print("Length of filtered contours: " + str(len(filtered_contours)))
 
     cv2.imshow('None approximation', image_copy)
