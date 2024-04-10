@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 import anglecalc
 def cannyTransform(image):
     # Setting parameter values
-    t_lower = 100  # Lower Threshold
-    t_upper = 300  # Upper threshold
+    t_lower = 1  # Lower Threshold
+    t_upper = 999  # Upper threshold
 
     # Applying the Canny Edge filter
     edges = cv2.Canny(image, t_lower, t_upper)
@@ -13,7 +13,7 @@ def cannyTransform(image):
 
 
 def findContours(image):
-    contours, _ = cv2.findContours(image, mode=cv2.RETR_TREE, method=cv2.CHAIN_APPROX_NONE)
+    contours, _ = cv2.findContours(image, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_NONE)
 
     min_contour_length = 500
 
@@ -31,7 +31,7 @@ def findContours(image):
                      lineType=cv2.LINE_AA)
 
     if filtered_contours:
-        first_contour_coordinates = filtered_contours[8].reshape(-1, 2)  # Reshape to Nx2 array
+        first_contour_coordinates = filtered_contours[1].reshape(-1, 2)  # Reshape to Nx2 array
         x = [point[0] for point in first_contour_coordinates]
         y = [point[1] for point in first_contour_coordinates]
 
@@ -59,7 +59,7 @@ def findContours(image):
         #print("Coordinates of the contour:")
         tc = 0
         for x, y in first_contour_coordinates:
-            print(f"({x}, {y})")
+            #print(f"({x}, {y})")
             tc += 1
         #for x,y in first_contour_coordinates:
         #    print(anglecalc.calculate_angle(x,y,x+1,y+1,x+20,y+20,x+21,y+21))
@@ -72,7 +72,7 @@ def findContours(image):
                 x2, y2 = first_contour_coordinates[i + 1]
                 x4, y4 = first_contour_coordinates[i + 3]
                 x5, y5 = first_contour_coordinates[i + 4]
-
+                #print(x4,y4)
                 angle = anglecalc.calculate_angle(x1, y1, x2, y2, x4, y4, x5, y5)
                 # Check if the angle has been seen before
                 if 80 <= angle <=  100:
@@ -86,6 +86,7 @@ def findContours(image):
                     else:
                         # Add the angle to the dictionary
                         seen_angles[angle] = 1
+        print(seen_points)
 
 
 
@@ -97,7 +98,7 @@ def findContours(image):
 def findCorner():
     pass
 # Read the image
-img = cv2.imread("images/allpieces/allpiecesCannypaint.png")
+img = cv2.imread("images/allpieces/allpiecesdetourata.png")
 
 # Perform Canny edge detection
 cannyRst = cannyTransform(img)
@@ -106,9 +107,10 @@ cannyRst = cannyTransform(img)
 contour_image = findContours(cannyRst)
 
 # Save the resulting image
-#cv2.imwrite("contours_detected.jpg", contour_image)
-
+cv2.imwrite("contours_detected.jpg", contour_image)
+img2 = cv2.imread("images/allpieces/allpiecesdetourata.png")
 # Display the resulting image
+cv2.imshow("Canny", cannyTransform(img2))
 cv2.imshow("Canny Converted", cannyRst)
 cv2.imshow("Contours Detected", contour_image)
 cv2.waitKey(0)

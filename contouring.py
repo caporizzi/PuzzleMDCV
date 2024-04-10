@@ -25,6 +25,7 @@ def applyBinaryAndDrawContours(image):
         cv2.drawContours(image=image_copy, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=2,
                          lineType=cv2.LINE_AA)
     print("Length of filtered contours: " + str(len(filtered_contours)))
+
     cv2.imshow('None approximation', image_copy)
     cv2.waitKey(0)
     cv2.destroyAllWindows()
@@ -36,6 +37,7 @@ def checkContoursAndDraw(contours_data, index):
 
     x = [point[0] for point in ravelled_contour]
     y = [point[1] for point in ravelled_contour]
+
     segment_length = 100
     num_segments = len(x) // segment_length
     remainder = len(x) % segment_length
@@ -57,15 +59,19 @@ def checkContoursAndDraw(contours_data, index):
     # Show the plot
     plt.grid(True)
     plt.show()
+    for x, y in ravelled_contour:
+        print(f"({x}, {y})")
+        
     return ravelled_contour
 
 def findAngles(contours_data):
     seen_points = set()
     seen_angles = {}
-
+    useful_points = []
     for i in range(len(contours_data) - 4):
         x1, y1 = contours_data[i]
         x2, y2 = contours_data[i + 1]
+        x3, y3 = contours_data[i + 2]
         x4, y4 = contours_data[i + 3]
         x5, y5 = contours_data[i + 4]
         # print(x4,y4)
@@ -75,21 +81,28 @@ def findAngles(contours_data):
 
             if angle in seen_angles:
                 # Add points to seen_points only if the same angle is obtained twice
+
+
                 points = [(x1, y1), (x2, y2), (x4, y4), (x5, y5)]
                 if not any(point in seen_points for point in points):
                     print(f"Angle: {angle}°, Points: {points}")
                     seen_points.update(points)
+                    useful_points.append((x3, y3))
             else:
                 # Add the angle to the dictionary
                 seen_angles[angle] = 1
-    print("Number of seen points: " + str(seen_points))
+
+    print("My informative points of length: " + str(len(useful_points)) + " are: " + str(useful_points) )
+    #print("Number of seen points: " + str(seen_points))
+
+    return useful_points #y wannabe corners
 
 
 
 
 
 contours = applyBinaryAndDrawContours(originalImage)
-ravelledContours = checkContoursAndDraw(contours, 5)
+ravelledContours = checkContoursAndDraw(contours, 2)
 findAngles(ravelledContours)
 
 
