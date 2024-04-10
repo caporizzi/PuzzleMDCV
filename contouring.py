@@ -24,6 +24,7 @@ def applyBinaryAndDrawContours(image):
     for idx, contour in enumerate(filtered_contours):
         cv2.drawContours(image=image_copy, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=2,
                          lineType=cv2.LINE_AA)
+        #add annotation to each contour
         M = cv2.moments(contour)
         if M["m00"] != 0:
             cX = int(M["m10"] / M["m00"])
@@ -108,7 +109,7 @@ def findAngles(contours_data):
 
 
 contours = applyBinaryAndDrawContours(originalImage)
-ravelledContours = checkContoursAndDraw(contours, 2)
+ravelledContours = checkContoursAndDraw(contours, 0)
 findAngles(ravelledContours)
 
 
