@@ -4,7 +4,7 @@ import numpy as np
 import cv2 as cv
 
 
-training_file = 'images/cornerTraining/allTrue.jpg'
+training_file = 'images/random_images/climbing.jpg'
 filename = argv[0] if len(argv) > 0 else training_file
 
 # Loads an image

@@ -1,7 +1,10 @@
 import cv2
 import matplotlib.pyplot as plt
 import anglecalc
-originalImage = cv2.imread('images/allpieces/detourPieces.png')
+import numpy as np
+from itertools import permutations
+from collections import Counter
+originalImage = cv2.imread('images/allpiecesflash/ok.png')
 
 def applyBinaryAndDrawContours(image):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
@@ -12,7 +15,7 @@ def applyBinaryAndDrawContours(image):
 
     # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
     contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_NONE)
-    min_contour_length = 500
+    min_contour_length = 200
 
     filtered_contours = []
 
@@ -66,9 +69,10 @@ def checkContoursAndDraw(contours_data, index):
     # Show the plot
     plt.grid(True)
     plt.show()
+    """
     for x, y in ravelled_contour:
         print(f"({x}, {y})")
-        
+    """
     return ravelled_contour
 
 def findAngles(contours_data):
@@ -104,12 +108,128 @@ def findAngles(contours_data):
 
     return useful_points #y wannabe corners
 
+def calcAngleKwarg(x1,y1,x2,y2,x3,y3):
+    # Define vectors representing the two lines
+    line1_vector = np.array([x2 - x1, y2 - y1])
+    line2_vector = np.array([x3 - x2, y3 - y2])
 
+    # Calculate the dot product and magnitudes of the vectors
+    dot_product = np.dot(line1_vector, line2_vector)
+    magnitude_line1 = np.linalg.norm(line1_vector)
+    magnitude_line2 = np.linalg.norm(line2_vector)
+
+    # Calculate the cosine of the angle between the two lines
+    cosine_angle = dot_product / (magnitude_line1 * magnitude_line2)
+
+    # Calculate the angle in degrees
+    angle = np.arccos(cosine_angle)
+    angle = np.degrees(angle)
+
+    return angle
+
+def find_90_deg_angles(setOfPoints):
+    valid_permutations = []
+    for permutation in permutations(setOfPoints, 3):  # Considering permutations of 3 points
+        x1, y1 = permutation[0]
+        x2, y2 = permutation[1]
+        x3, y3 = permutation[2]
+        vector1_length = np.linalg.norm(np.array([x2 - x1, y2 - y1]))
+        vector2_length = np.linalg.norm(np.array([x3 - x2, y3 - y2]))
+        # Check if both vector lengths are within the specified range
+        if (65 <= vector1_length <= 150) and (65 <= vector2_length <= 200) and \
+                (0.6 * vector1_length <= vector2_length <= 1.5 * vector1_length) and \
+                (0.6 * vector2_length <= vector1_length <= 1.5 * vector2_length):
+            # Check if permutation is not a reverse of another permutation
+            if (x1, y1) < (x3, y3):
+                angle = calcAngleKwarg(x1, y1, x2, y2, x3, y3)
+                if 81 < angle < 99:  # Check if angle is close to 90°
+                    valid_permutations.append(permutation)
+    print(valid_permutations)
+    return valid_permutations
+
+def find_hidden_square(valid_permutations):
+    # Flatten the valid permutations to get all points
+    all_points = [point for perm in valid_permutations for point in perm]
+    # Count the occurrences of each point
+    point_counts = Counter(all_points)
+    # Select the four coordinates with the highest counts
+    most_common_points = point_counts.most_common(4)
+    # Extract only the coordinates
+    hidden_square = [point[0] for point in most_common_points]
+    print(hidden_square)
+    return hidden_square
+
+def plot_points(setOfPoints, title):
+    xpoints = [point[0] for point in setOfPoints]
+    ypoints = [point[1] for point in setOfPoints]
+    plt.plot(xpoints, ypoints, 'o')
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.title(title)
+    plt.grid(True)
+    plt.show()
+
+def plot_hidden_square(setOfPoints, hidden_square, title):
+    xpoints = [point[0] for point in setOfPoints]
+    ypoints = [point[1] for point in setOfPoints]
+
+    plt.plot(xpoints, ypoints, 'o')
+
+    # Extract the x and y coordinates of the hidden square
+    square_x = [point[0] for point in hidden_square]
+    square_y = [point[1] for point in hidden_square]
+
+    # Plot lines connecting the points of the hidden square
+    for i in range(len(square_x)):
+        plt.plot([square_x[i], square_x[(i + 1) % 4]], [square_y[i], square_y[(i + 1) % 4]], 'r-')
+
+    plt.xlabel('X-axis')
+    plt.ylabel('Y-axis')
+    plt.title(title)
+    plt.grid(True)
+    plt.show()
+
+def segment_contour(ravelled_contour, square_points):
+    segments = [[] for _ in range(4)]  # Create four empty segments
+
+    current_segment_index = 0
+
+    for point in ravelled_contour:
+        if any((point == corner).all() for corner in square_points):
+            # If we encounter a corner point, move to the next segment
+            current_segment_index = (current_segment_index + 1) % 4
+
+        segments[current_segment_index].append(point)
+    
+    colors = ['r', 'g', 'b', 'y']  # Different colors for each segment
+
+    plt.figure(figsize=(6, 6))
+
+    for i, segment in enumerate(segments):
+        x, y = zip(*segment)
+        plt.plot(x, y, color=colors[i], label=f"Segment {i + 1}")
+
+    plt.gca().set_aspect('equal', adjustable='box')
+    plt.legend()
+    plt.show()
+    return segments
+
+# Example usage:
+# segmented_sides = segment_contour(ravelled_contour, hidden_square)
 
 
 
 contours = applyBinaryAndDrawContours(originalImage)
+
+
 ravelledContours = checkContoursAndDraw(contours, 0)
-findAngles(ravelledContours)
+useful_points = findAngles(ravelledContours)
+allPermutations = find_90_deg_angles(useful_points)
+hiddenSquare = find_hidden_square(allPermutations)
+plot_points(useful_points, "Informative Points Kwarg")
+segmented_sides = segment_contour(ravelledContours, hiddenSquare)
+#plot_hidden_square(useful_points, hiddenSquare, 'Hidden Square')
+
+
 
 

@@ -47,8 +47,14 @@ setOfValidPoints = [(46,1110),(48,1227),(170,1214)]
 def findOppositePoint(x1,y1,x2,y2,x3,y3):
     line1_vector = np.array([x2 - x1, y2 - y1])
     line2_vector = np.array([x3 - x2, y3 - y2])
-    print(line1_vector)
+    newx2,newy2 = (48,1227)-line1_vector
+    new_x2,new_y2 = (newx2,newy2)-line2_vector
+    print(new_x2,new_y2)
+findOppositePoint(46,1110,48,1227,170,1214)
 
-    pass
+
+#Once we foudn the 4 corners, we can classify using the rest of the key points
+
+#if therer's a keypoint outside my conrer it has 1
 
 
