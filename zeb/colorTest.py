@@ -1,13 +1,16 @@
+# In :
+#   - col1: premiere couleur a comparer, format tableau RGB [a,b,c] avec a,b,c des nombres entre 0 et 255
+#   - col2: seconde couleur a comparer, format tableau RGB [a,b,c] avec a,b,c des nombres entre 0 et 255
+# Out :
+#   renvoie un "taux de proximité" compris entre 0 et 1
 def colorTest(col1, col2):
-    if len(col1) != len(col2):
-        print("les deux tableaux font pas la meme taille chef.")
-        return 0
-    else:
-        tot = 0
-        for i in range(0,len(col1)):
-            tot += (abs(col1[i][0] - col2[i][0]) + abs(col1[i][1] - col2[i][1]) + abs(col1[i][2] - col2[i][2])) / 765
-        
-        return 1 - (tot / len(col1))
+    assert(len(col1) == len(col2), "les deux tableaux font pas la meme taille chef.")
+
+    tot = 0
+    for i in range(0,len(col1)):
+        tot += (abs(col1[i][0] - col2[i][0]) + abs(col1[i][1] - col2[i][1]) + abs(col1[i][2] - col2[i][2])) / 765
+    
+    return 1 - (tot / len(col1))
     
 
 
