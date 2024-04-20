@@ -25,7 +25,7 @@ def applyBinaryAndDrawContours(image):
             filtered_contours.append(contour)
     image_copy = image.copy()
     for idx, contour in enumerate(filtered_contours):
-        cv2.drawContours(image=image_copy, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=2,
+        cv2.drawContours(image=image_copy, contours=[contour], contourIdx=-1, color=(0, 255, 0), thickness=1,
                          lineType=cv2.LINE_AA)
         #add annotation to each contour
         M = cv2.moments(contour)
@@ -217,19 +217,25 @@ def segment_contour(ravelled_contour, square_points):
 # Example usage:
 # segmented_sides = segment_contour(ravelled_contour, hidden_square)
 
+def removeBorders(image, contour):
+    pass
 
+
+
+def ravelContours(index):
+    contoursss = contours
+    ravelled_contour = contoursss[index].reshape(-1,2)
 
 contours = applyBinaryAndDrawContours(originalImage)
-
-
-ravelledContours = checkContoursAndDraw(contours, 0)
-useful_points = findAngles(ravelledContours)
-allPermutations = find_90_deg_angles(useful_points)
-hiddenSquare = find_hidden_square(allPermutations)
-plot_points(useful_points, "Informative Points Kwarg")
-segmented_sides = segment_contour(ravelledContours, hiddenSquare)
-#plot_hidden_square(useful_points, hiddenSquare, 'Hidden Square')
-
+for i in range(5):
+    ravelledContours = checkContoursAndDraw(contours, i)
+    #removeBorders(originalImage, ravelledContours)
+    useful_points = findAngles(ravelledContours)
+    allPermutations = find_90_deg_angles(useful_points)
+    hiddenSquare = find_hidden_square(allPermutations)
+    #plot_points(useful_points, "Informative Points Kwarg")
+    segmented_sides = segment_contour(ravelledContours, hiddenSquare)
+    #plot_hidden_square(useful_points, hiddenSquare, 'Hidden Square')
 
 
 
