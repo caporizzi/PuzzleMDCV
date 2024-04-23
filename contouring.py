@@ -4,14 +4,14 @@ import anglecalc
 import numpy as np
 from itertools import permutations
 from collections import Counter
-originalImage = cv2.imread('images/allpiecesflash/ok.png')
 
-def applyBinaryAndDrawContours(image):
+def applyBinaryAndDrawContours(image, draw=True):
     gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)  # Convert to grayscale
     ret, thresh = cv2.threshold(gray, 1, 999, cv2.THRESH_BINARY)
-    cv2.imshow('Binary', thresh)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    if draw:
+        cv2.imshow('Binary', thresh)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
 
     # detect the contours on the binary image using cv2.CHAIN_APPROX_NONE
     contours, hierarchy = cv2.findContours(image=thresh, mode=cv2.RETR_EXTERNAL, method=cv2.CHAIN_APPROX_NONE)
@@ -36,13 +36,14 @@ def applyBinaryAndDrawContours(image):
             cv2.putText(image_copy, f"Cont {idx}", (cX, cY), cv2.FONT_HERSHEY_SIMPLEX, 0.4, (255, 255, 255), 2)
     print("Length of filtered contours: " + str(len(filtered_contours)))
 
-    cv2.imshow('None approximation', image_copy)
-    cv2.waitKey(0)
-    cv2.destroyAllWindows()
+    if draw:
+        cv2.imshow('None approximation', image_copy)
+        cv2.waitKey(0)
+        cv2.destroyAllWindows()
     return filtered_contours
 
 
-def checkContoursAndDraw(contours_data, index):
+def checkContoursAndDraw(contours_data, index, draw=True):
     ravelled_contour = contours_data[index].reshape(-1,2)
 
     x = [point[0] for point in ravelled_contour]
@@ -61,18 +62,19 @@ def checkContoursAndDraw(contours_data, index):
         plt.plot(x[i:i + segment_length], y[i:i + segment_length], marker='o',
                  color='C{}'.format(i // segment_length))  # Using color cycling
 
-    # Add labels and title
-    plt.xlabel('X-axis')
-    plt.ylabel('Y-axis')
-    plt.title('Line Plot')
+    if draw:
+        # Add labels and title
+        plt.xlabel('X-axis')
+        plt.ylabel('Y-axis')
+        plt.title('Line Plot')
 
-    # Show the plot
-    plt.grid(True)
-    plt.show()
-    """
-    for x, y in ravelled_contour:
-        print(f"({x}, {y})")
-    """
+        # Show the plot
+        plt.grid(True)
+        plt.show()
+        """
+        for x, y in ravelled_contour:
+            print(f"({x}, {y})")
+        """
     return ravelled_contour
 
 def findAngles(contours_data):
@@ -189,7 +191,7 @@ def plot_hidden_square(setOfPoints, hidden_square, title):
     plt.grid(True)
     plt.show()
 
-def segment_contour(ravelled_contour, square_points):
+def segment_contour(ravelled_contour, square_points, draw=True):
     segments = [[] for _ in range(4)]  # Create four empty segments
 
     current_segment_index = 0
@@ -209,9 +211,11 @@ def segment_contour(ravelled_contour, square_points):
         x, y = zip(*segment)
         plt.plot(x, y, color=colors[i], label=f"Segment {i + 1}")
 
-    plt.gca().set_aspect('equal', adjustable='box')
-    plt.legend()
-    plt.show()
+    if draw:
+        plt.gca().set_aspect('equal', adjustable='box')
+        plt.legend()
+        plt.show()
+
     return segments
 
 # Example usage:
@@ -226,16 +230,18 @@ def ravelContours(index):
     contoursss = contours
     ravelled_contour = contoursss[index].reshape(-1,2)
 
-contours = applyBinaryAndDrawContours(originalImage)
-for i in range(5):
-    ravelledContours = checkContoursAndDraw(contours, i)
-    #removeBorders(originalImage, ravelledContours)
-    useful_points = findAngles(ravelledContours)
-    allPermutations = find_90_deg_angles(useful_points)
-    hiddenSquare = find_hidden_square(allPermutations)
-    #plot_points(useful_points, "Informative Points Kwarg")
-    segmented_sides = segment_contour(ravelledContours, hiddenSquare)
-    #plot_hidden_square(useful_points, hiddenSquare, 'Hidden Square')
+if __name__ == "__main__":
+    originalImage = cv2.imread('images/allpieces/all.png')
+    contours = applyBinaryAndDrawContours(originalImage)
+    for i in range(5):
+        ravelledContours = checkContoursAndDraw(contours, i)
+        #removeBorders(originalImage, ravelledContours)
+        useful_points = findAngles(ravelledContours)
+        allPermutations = find_90_deg_angles(useful_points)
+        hiddenSquare = find_hidden_square(allPermutations)
+        #plot_points(useful_points, "Informative Points Kwarg")
+        segmented_sides = segment_contour(ravelledContours, hiddenSquare)
+        #plot_hidden_square(useful_points, hiddenSquare, 'Hidden Square')
 
 
 
